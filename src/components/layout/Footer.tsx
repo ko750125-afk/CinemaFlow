@@ -19,7 +19,7 @@ export function Footer() {
           {/* Logo & Slogan */}
           <div className="md:col-span-2 space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Film className="h-6 w-6 text-primary" />
+              <img src="/icon-192x192.jpg" alt="CinemaFlow Logo" className="h-6 w-6 rounded-md object-cover" />
               <span className="inline-block font-bold text-xl">CinemaFlow</span>
             </Link>
             <p className="text-muted-foreground text-sm">

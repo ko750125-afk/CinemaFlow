@@ -52,7 +52,7 @@ export function Header({ user }: HeaderProps) {
           {/* Logo & Desktop Nav */}
           <div className="flex items-center gap-6 md:gap-10">
             <Link href="/" className="flex items-center space-x-2">
-              <Film className="h-6 w-6 text-primary" />
+              <img src="/icon-192x192.jpg" alt="CinemaFlow Logo" className="h-6 w-6 rounded-md object-cover" />
               <span className="inline-block font-bold text-xl">CinemaFlow</span>
             </Link>
             <nav className="hidden md:flex gap-6">
@@ -185,7 +185,7 @@ export function Header({ user }: HeaderProps) {
               <SheetContent side="right" className="pr-0">
                 <div className="px-7 flex flex-col gap-6">
                   <Link href="/" className="flex items-center space-x-2">
-                    <Film className="h-6 w-6 text-primary" />
+                    <img src="/icon-192x192.jpg" alt="CinemaFlow Logo" className="h-6 w-6 rounded-md object-cover" />
                     <span className="font-bold">CinemaFlow</span>
                   </Link>
                   <div className="flex flex-col gap-4 mt-4">

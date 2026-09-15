@@ -40,8 +40,8 @@ export default function LoginPage() {
     <div className="container mx-auto flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <div className="w-full max-w-[400px]">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Film className="h-6 w-6" />
+          <div className="mb-4 h-16 w-16 overflow-hidden rounded-2xl shadow-lg">
+            <img src="/icon-192x192.jpg" alt="CinemaFlow Logo" className="h-full w-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">CinemaFlow 시작하기</h1>
           <p className="text-sm text-muted-foreground mt-2">
