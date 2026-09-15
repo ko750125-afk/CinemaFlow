@@ -7,6 +7,7 @@ interface LearningState {
   toggleLearningMode: () => void;
   markAsLearned: (id: string) => void;
   unmarkAsLearned: (id: string) => void;
+  setLearnedComponents: (components: string[]) => void;
 }
 
 export const useLearningStore = create<LearningState>()(
@@ -25,6 +26,7 @@ export const useLearningStore = create<LearningState>()(
         set((state) => ({
           learnedComponents: state.learnedComponents.filter((c) => c !== id),
         })),
+      setLearnedComponents: (components) => set({ learnedComponents: components }),
     }),
     {
       name: "learning-storage",

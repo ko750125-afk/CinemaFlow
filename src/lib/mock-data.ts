@@ -13,6 +13,7 @@ export interface Movie {
   posterUrl: string;
   backdropUrl: string;
   isUpcoming?: boolean;
+  videoKey?: string;
 }
 
 export const movies: Movie[] = [

@@ -1,30 +1,7 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { Filter, SlidersHorizontal } from "lucide-react";
-import { movies, genres } from "@/lib/mock-data";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { LearningWrapper } from "@/components/learning/LearningWrapper";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import {
   Pagination,
   PaginationContent,
@@ -33,134 +10,64 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { ExploreFilters, ExploreSortSelect } from "@/components/movie/ExploreFilters";
+import { discoverMovies } from "@/lib/tmdb";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function ExplorePage() {
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [minRating, setMinRating] = useState<number[]>([0]);
-  const [sort, setSort] = useState("latest");
+export default async function ExplorePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedParams = await searchParams;
+  
+  const page = Number(resolvedParams.page) || 1;
+  const with_genres = typeof resolvedParams.with_genres === "string" ? resolvedParams.with_genres : undefined;
+  const vote_average_gte = typeof resolvedParams["vote_average.gte"] === "string" ? resolvedParams["vote_average.gte"] : undefined;
+  const sort_by = typeof resolvedParams.sort_by === "string" ? resolvedParams.sort_by : "popularity.desc";
 
-  const toggleGenre = (genre: string) => {
-    setSelectedGenres(prev => 
-      prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
-    );
+  const fetchParams: Record<string, string> = {
+    page: page.toString(),
+    sort_by,
   };
 
-  const filteredMovies = movies.filter(movie => {
-    if (selectedGenres.length > 0 && !movie.genre.some(g => selectedGenres.includes(g))) return false;
-    if (movie.rating < minRating[0]) return false;
-    return true;
-  }).sort((a, b) => {
-    if (sort === "latest") return b.year - a.year;
-    if (sort === "rating") return b.rating - a.rating;
-    if (sort === "title") return a.title.localeCompare(b.title);
-    return 0;
-  });
+  if (with_genres) fetchParams.with_genres = with_genres;
+  if (vote_average_gte) fetchParams["vote_average.gte"] = vote_average_gte;
 
-  const FilterContent = () => (
-    <div className="space-y-8">
-      <div className="space-y-4">
-        <h3 className="font-semibold text-lg flex items-center gap-2">
-          <Filter className="w-5 h-5" /> 장르
-        </h3>
-        <LearningWrapper componentId="checkbox">
-          <div className="grid grid-cols-2 gap-4">
-            {genres.filter(g => g !== "전체").map(genre => (
-              <div key={genre} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`genre-${genre}`} 
-                  checked={selectedGenres.includes(genre)}
-                  onCheckedChange={() => toggleGenre(genre)}
-                />
-                <Label htmlFor={`genre-${genre}`} className="cursor-pointer">{genre}</Label>
-              </div>
-            ))}
-          </div>
-        </LearningWrapper>
-      </div>
+  const { results: filteredMovies, totalPages } = await discoverMovies(fetchParams);
 
-      <div className="space-y-4">
-        <h3 className="font-semibold text-lg">최소 평점</h3>
-        <LearningWrapper componentId="slider">
-          <div className="pt-4">
-            <Slider
-              defaultValue={[0]}
-              max={10}
-              step={0.5}
-              value={minRating}
-              onValueChange={setMinRating}
-            />
-            <div className="mt-2 text-right text-sm font-medium">
-              ★ {minRating[0].toFixed(1)} 이상
-            </div>
-          </div>
-        </LearningWrapper>
-      </div>
-      
-      <Button 
-        variant="outline" 
-        className="w-full"
-        onClick={() => {
-          setSelectedGenres([]);
-          setMinRating([0]);
-        }}
-      >
-        필터 초기화
-      </Button>
-    </div>
-  );
+  // Pagination Helper
+  const createPageURL = (pageNumber: number | string) => {
+    const params = new URLSearchParams();
+    if (with_genres) params.set("with_genres", with_genres);
+    if (vote_average_gte) params.set("vote_average.gte", vote_average_gte);
+    params.set("sort_by", sort_by);
+    params.set("page", pageNumber.toString());
+    return `/explore?${params.toString()}`;
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8">
         
-        {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-64 shrink-0">
-          <div className="sticky top-24">
-            <FilterContent />
-          </div>
-        </aside>
+        <Suspense fallback={<div className="w-64"><Skeleton className="h-96 w-full" /></div>}>
+          <ExploreFilters />
+        </Suspense>
 
         {/* Main Content */}
         <div className="flex-1 space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold">영화 탐색</h1>
-            
             <div className="flex items-center gap-4">
-              {/* Mobile Filter Button */}
-              <div className="md:hidden">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <SlidersHorizontal className="w-4 h-4 mr-2" />
-                      필터
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-[300px]">
-                    <SheetHeader className="mb-6">
-                      <SheetTitle>필터</SheetTitle>
-                    </SheetHeader>
-                    <FilterContent />
-                  </SheetContent>
-                </Sheet>
-              </div>
-
-              <LearningWrapper componentId="select">
-                <Select value={sort} onValueChange={setSort}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="정렬 방식" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="latest">최신순</SelectItem>
-                    <SelectItem value="rating">평점순</SelectItem>
-                    <SelectItem value="title">가나다순</SelectItem>
-                  </SelectContent>
-                </Select>
-              </LearningWrapper>
+              <Suspense fallback={<Skeleton className="w-[140px] h-10" />}>
+                <ExploreSortSelect />
+              </Suspense>
             </div>
           </div>
 
           <div className="text-sm text-muted-foreground mb-4">
-            총 {filteredMovies.length}개의 작품이 있습니다.
+            탐색된 작품들입니다.
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -182,7 +89,7 @@ export default function ExplorePage() {
                       <div className="flex items-center justify-between mt-1 text-sm text-muted-foreground">
                         <span>{movie.year}</span>
                         <span className="flex items-center gap-1 text-amber-500 font-medium">
-                          ★ {movie.rating}
+                          ★ {movie.rating.toFixed(1)}
                         </span>
                       </div>
                     </div>
@@ -198,23 +105,39 @@ export default function ExplorePage() {
             </div>
           )}
 
-          {filteredMovies.length > 0 && (
+          {filteredMovies.length > 0 && totalPages > 1 && (
             <div className="pt-8">
               <LearningWrapper componentId="pagination">
                 <Pagination>
                   <PaginationContent>
+                    {page > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious href={createPageURL(page - 1)} />
+                      </PaginationItem>
+                    )}
+                    
+                    {/* Show current, prev, next simply */}
+                    {page > 1 && (
+                      <PaginationItem>
+                        <PaginationLink href={createPageURL(page - 1)}>{page - 1}</PaginationLink>
+                      </PaginationItem>
+                    )}
+                    
                     <PaginationItem>
-                      <PaginationPrevious href="#" />
+                      <PaginationLink href={createPageURL(page)} isActive>{page}</PaginationLink>
                     </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink href="#" isActive>1</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink href="#">2</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationNext href="#" />
-                    </PaginationItem>
+                    
+                    {page < totalPages && (
+                      <PaginationItem>
+                        <PaginationLink href={createPageURL(page + 1)}>{page + 1}</PaginationLink>
+                      </PaginationItem>
+                    )}
+
+                    {page < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext href={createPageURL(page + 1)} />
+                      </PaginationItem>
+                    )}
                   </PaginationContent>
                 </Pagination>
               </LearningWrapper>

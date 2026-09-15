@@ -54,8 +54,8 @@ export function LearningSheet() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
-        <SheetHeader className="mb-6">
+      <SheetContent className="w-[90vw] sm:w-[600px] sm:max-w-[600px] overflow-y-auto p-6">
+        <SheetHeader className="mb-6 pb-2 border-b">
           <div className="flex justify-between items-start">
             <div>
               <SheetTitle className="text-2xl font-bold flex items-center gap-2">
@@ -76,17 +76,17 @@ export function LearningSheet() {
           </div>
         </SheetHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 px-2">
           <div>
             <h4 className="font-semibold mb-2 text-sm text-muted-foreground uppercase tracking-wider">일반적인 사용 목적</h4>
-            <p className="text-sm">{activeComponent.purpose}</p>
+            <p className="text-sm leading-relaxed">{activeComponent.purpose}</p>
           </div>
 
           <Separator />
 
           <div>
             <h4 className="font-semibold mb-2 text-sm text-muted-foreground uppercase tracking-wider">현재 화면에서 사용된 이유</h4>
-            <p className="text-sm">{activeComponent.reasonUsed}</p>
+            <p className="text-sm leading-relaxed">{activeComponent.reasonUsed}</p>
           </div>
 
           <Separator />
@@ -104,7 +104,7 @@ export function LearningSheet() {
 
           <div>
             <h4 className="font-semibold mb-2 text-sm text-muted-foreground uppercase tracking-wider">짧은 사용 예제</h4>
-            <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto text-muted-foreground">
+            <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto text-muted-foreground whitespace-pre-wrap">
               <code>{activeComponent.exampleCode}</code>
             </pre>
           </div>
@@ -113,12 +113,12 @@ export function LearningSheet() {
 
           <div>
             <h4 className="font-semibold mb-2 text-sm text-muted-foreground uppercase tracking-wider">접근성 및 주의사항</h4>
-            <p className="text-sm">{activeComponent.accessibility}</p>
+            <p className="text-sm leading-relaxed">{activeComponent.accessibility}</p>
           </div>
           
           <Separator />
 
-          <div className="flex items-center space-x-2 bg-muted/50 p-4 rounded-lg">
+          <div className="flex items-center space-x-2 bg-muted/50 p-4 rounded-lg mt-8">
             <Checkbox 
               id="learned" 
               checked={isLearned} 

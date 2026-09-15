@@ -1,22 +1,9 @@
-"use client";
-
-import { use, useState } from "react";
 import Link from "next/link";
-import { Play, Plus, Share2, Star, Clock, Calendar, ChevronRight } from "lucide-react";
-import { movies } from "@/lib/mock-data";
+import { Star, Clock, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LearningWrapper } from "@/components/learning/LearningWrapper";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Separator } from "@/components/ui/separator";
@@ -40,17 +27,21 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { getMovieDetail, getPopularMovies } from "@/lib/tmdb";
+import { notFound } from "next/navigation";
+import { MovieHeroActions } from "@/components/movie/MovieHeroActions";
 
-export default function MovieDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const movie = movies.find(m => m.id === resolvedParams.id) || movies[0];
-  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+export default async function MovieDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const movie = await getMovieDetail(id);
 
-  const handleAddToCollection = () => {
-    toast.success("컬렉션에 추가되었습니다", {
-      description: `"${movie.title}" 영화가 '보고 싶은 영화'에 추가되었습니다.`,
-    });
-  };
+  if (!movie) {
+    notFound();
+  }
+
+  // 비슷한 콘텐츠를 위해 일단 인기 영화를 불러옵니다 (실제로는 getRecommendations(id)를 써도 됨)
+  const relatedMovies = await getPopularMovies();
+  const filteredRelated = relatedMovies.filter(m => m.id !== movie.id).slice(0, 4);
 
   return (
     <div className="flex flex-col pb-20">
@@ -101,7 +92,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
               
               <div className="flex flex-wrap items-center gap-4 text-sm md:text-base text-white/80">
                 <span className="flex items-center gap-1 text-amber-500 font-bold">
-                  <Star className="w-4 h-4 fill-current" /> {movie.rating}
+                  <Star className="w-4 h-4 fill-current" /> {movie.rating.toFixed(1)}
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" /> {movie.year}
@@ -120,38 +111,13 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                 ))}
               </div>
               
-              <div className="flex flex-wrap items-center gap-3 pt-4">
-                <LearningWrapper componentId="dialog">
-                  <Dialog open={isTrailerOpen} onOpenChange={setIsTrailerOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="lg" className="rounded-full font-bold">
-                        <Play className="mr-2 h-5 w-5" /> 예고편 재생
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-black border-white/10">
-                      <DialogHeader className="p-4 absolute top-0 w-full z-10 bg-gradient-to-b from-black/80 to-transparent">
-                        <DialogTitle className="text-white opacity-0">{movie.title} 예고편</DialogTitle>
-                        <DialogDescription className="opacity-0">예고편 재생</DialogDescription>
-                      </DialogHeader>
-                      <AspectRatio ratio={16 / 9} className="bg-muted flex items-center justify-center relative">
-                        <img src={movie.backdropUrl} className="absolute inset-0 w-full h-full object-cover opacity-50" />
-                        <div className="z-10 text-center space-y-2">
-                          <Play className="w-16 h-16 mx-auto text-white/80" />
-                          <p className="text-white/80 font-medium">1차 버전에서는 실제 영상이 재생되지 않습니다.</p>
-                        </div>
-                      </AspectRatio>
-                    </DialogContent>
-                  </Dialog>
-                </LearningWrapper>
-
-                <Button size="lg" variant="secondary" className="rounded-full" onClick={handleAddToCollection}>
-                  <Plus className="mr-2 h-5 w-5" /> 내 컬렉션
-                </Button>
-                
-                <Button size="icon" variant="outline" className="rounded-full border-white/30 bg-white/5 backdrop-blur-sm text-white hover:bg-white/20">
-                  <Share2 className="h-4 w-4" />
-                </Button>
-              </div>
+              <MovieHeroActions 
+                movieId={movie.id}
+                movieTitle={movie.title} 
+                backdropUrl={movie.backdropUrl} 
+                posterUrl={movie.posterUrl}
+                videoKey={movie.videoKey} 
+              />
             </div>
           </div>
         </div>
@@ -209,7 +175,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                               </div>
                               <div>
                                 <span className="text-muted-foreground block text-sm">제작국가</span>
-                                <span className="font-medium">대한민국</span>
+                                <span className="font-medium">TMDB 데이터</span>
                               </div>
                             </div>
                           </AccordionContent>
@@ -217,7 +183,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                         <AccordionItem value="item-2">
                           <AccordionTrigger>부가 정보</AccordionTrigger>
                           <AccordionContent>
-                            <p className="text-muted-foreground">이 영화는 CinemaFlow 1차 데모를 위해 구성된 가상의 데이터입니다.</p>
+                            <p className="text-muted-foreground">이 영화는 TMDB API를 통해 가져온 실제 데이터입니다.</p>
                           </AccordionContent>
                         </AccordionItem>
                       </Accordion>
@@ -236,7 +202,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                               <AvatarFallback>{movie.director[0]}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium">{movie.director}</p>
+                              <p className="font-medium line-clamp-1">{movie.director}</p>
                               <p className="text-xs text-muted-foreground">감독</p>
                             </div>
                           </div>
@@ -248,12 +214,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                             </Avatar>
                             <div className="space-y-1">
                               <h4 className="text-sm font-semibold">{movie.director}</h4>
-                              <p className="text-sm">대한민국의 영화 감독입니다.</p>
-                              <div className="flex items-center pt-2">
-                                <span className="text-xs text-muted-foreground">
-                                  필모그래피 보기
-                                </span>
-                              </div>
+                              <p className="text-sm">영화 감독입니다.</p>
                             </div>
                           </div>
                         </HoverCardContent>
@@ -261,17 +222,20 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                     </LearningWrapper>
 
                     {/* Cast */}
-                    {movie.cast.map(actor => (
-                      <div key={actor} className="flex items-center gap-3 p-2">
+                    {movie.cast.map((actor, idx) => (
+                      <div key={idx} className="flex items-center gap-3 p-2">
                         <Avatar className="h-12 w-12 border">
                           <AvatarFallback>{actor[0]}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{actor}</p>
-                          <p className="text-xs text-muted-foreground">주연</p>
+                          <p className="font-medium line-clamp-1">{actor}</p>
+                          <p className="text-xs text-muted-foreground">배우</p>
                         </div>
                       </div>
                     ))}
+                    {movie.cast.length === 0 && (
+                      <p className="text-muted-foreground">출연진 정보가 없습니다.</p>
+                    )}
                   </div>
                 </TabsContent>
 
@@ -286,28 +250,12 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                   <LearningWrapper componentId="scroll-area">
                     <ScrollArea className="h-[400px] pr-4">
                       <div className="space-y-6">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="bg-muted/30 p-4 rounded-xl space-y-3 border">
-                            <div className="flex justify-between items-start">
-                              <div className="flex items-center gap-2">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarFallback>U{i}</AvatarFallback>
-                                </Avatar>
-                                <span className="font-medium text-sm">User {i}</span>
-                              </div>
-                              <div className="flex text-amber-500 text-sm">
-                                ★ {10 - i + 1}
-                              </div>
-                            </div>
-                            <p className="text-sm text-foreground/80 leading-relaxed">
-                              정말 훌륭한 영화였습니다. 연출과 연기 모두 완벽에 가까웠어요.
-                              1차 데모에서 이렇게 훌륭한 UI를 볼 수 있다니 놀랍습니다!
-                            </p>
-                            <div className="text-xs text-muted-foreground">
-                              2024년 3월 {10 + i}일
-                            </div>
-                          </div>
-                        ))}
+                        <div className="bg-muted/30 p-4 rounded-xl space-y-3 border text-center py-8">
+                          <p className="text-muted-foreground">아직 작성된 리뷰가 없습니다.</p>
+                          <Button variant="link" asChild>
+                            <Link href={`/record?movieId=${movie.id}`}>첫 번째 리뷰를 남겨보세요!</Link>
+                          </Button>
+                        </div>
                       </div>
                     </ScrollArea>
                   </LearningWrapper>
@@ -320,7 +268,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
           <div className="w-full lg:w-80 shrink-0 space-y-6">
             <h3 className="font-bold text-lg">비슷한 콘텐츠</h3>
             <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-              {movies.filter(m => m.id !== movie.id).slice(0, 3).map(related => (
+              {filteredRelated.map(related => (
                 <Link href={`/movie/${related.id}`} key={related.id}>
                   <div className="flex gap-3 group cursor-pointer">
                     <div className="w-16 md:w-20 shrink-0 rounded-md overflow-hidden bg-muted">
@@ -331,7 +279,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                     <div className="flex-1 py-1">
                       <h4 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">{related.title}</h4>
                       <p className="text-xs text-muted-foreground mt-1">{related.year}</p>
-                      <div className="text-xs text-amber-500 font-medium mt-1">★ {related.rating}</div>
+                      <div className="text-xs text-amber-500 font-medium mt-1">★ {related.rating.toFixed(1)}</div>
                     </div>
                   </div>
                 </Link>
