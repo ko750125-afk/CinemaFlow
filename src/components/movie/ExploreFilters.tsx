@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { LearningWrapper } from "@/components/learning/LearningWrapper";
 import {
   Sheet,
@@ -73,22 +74,26 @@ export function ExploreFilters() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <Filter className="w-5 h-5" /> 장르
         </h3>
-        <LearningWrapper componentId="checkbox">
-          <div className="grid grid-cols-2 gap-4">
-            {Object.entries(GENRE_MAP).map(([idStr, name]) => {
-              const id = Number(idStr);
-              return (
-                <div key={id} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`genre-${id}`} 
-                    checked={selectedGenres.includes(id)}
-                    onCheckedChange={() => toggleGenre(id)}
-                  />
-                  <Label htmlFor={`genre-${id}`} className="cursor-pointer">{name}</Label>
-                </div>
-              );
-            })}
-          </div>
+        <LearningWrapper componentId="scroll-area">
+          <ScrollArea className="h-[240px] pr-4">
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(GENRE_MAP).map(([idStr, name]) => {
+                const id = Number(idStr);
+                return (
+                  <div key={id} className="flex items-center space-x-2">
+                    <LearningWrapper componentId="checkbox">
+                      <Checkbox 
+                        id={`genre-${id}`} 
+                        checked={selectedGenres.includes(id)}
+                        onCheckedChange={() => toggleGenre(id)}
+                      />
+                    </LearningWrapper>
+                    <Label htmlFor={`genre-${id}`} className="cursor-pointer">{name}</Label>
+                  </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
         </LearningWrapper>
       </div>
 

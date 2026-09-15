@@ -30,7 +30,13 @@ export default async function ExplorePage({
   const fetchParams: Record<string, string> = {
     page: page.toString(),
     sort_by,
+    "vote_count.gte": "50", // 최소 50명 이상이 평가한 영화만 노출 (쓰레기/더미 데이터 방지)
   };
+
+  if (sort_by === "primary_release_date.desc") {
+    // 최신순일 경우 미래 날짜(더미 데이터 등) 제외하고 오늘 날짜까지만 노출
+    fetchParams["primary_release_date.lte"] = new Date().toISOString().split("T")[0];
+  }
 
   if (with_genres) fetchParams.with_genres = with_genres;
   if (vote_average_gte) fetchParams["vote_average.gte"] = vote_average_gte;

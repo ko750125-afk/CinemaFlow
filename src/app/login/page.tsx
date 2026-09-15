@@ -49,7 +49,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <LearningWrapper componentId="card">
+        <LearningWrapper componentId="card" className="block w-full">
           <Card className="border-0 shadow-lg bg-card/50 backdrop-blur-sm text-center">
             <CardHeader>
               <CardTitle>환영합니다</CardTitle>

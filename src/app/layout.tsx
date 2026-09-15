@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { LearningSheet } from "@/components/learning/LearningSheet";
 import { LearningSyncProvider } from "@/components/learning/LearningSyncProvider";
 import { Toaster } from "@/components/ui/sonner";
@@ -41,6 +42,7 @@ export default async function RootLayout({
           <main className="min-h-[calc(100vh-4rem)]">
             {children}
           </main>
+          <Footer />
           <LearningSheet />
           <Toaster />
         </TooltipProvider>

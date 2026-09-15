@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LearningWrapper } from "@/components/learning/LearningWrapper";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { getPopularMovies, getTrendingMovies, getUpcomingMovies, getRecommendations, getMovieDetail } from "@/lib/tmdb";
 import { createClient } from "@/lib/supabase/server";
 
@@ -261,6 +262,38 @@ export default async function Home() {
                 ))}
               </TabsContent>
             </Tabs>
+          </LearningWrapper>
+        </section>
+        
+        <Separator />
+
+        {/* FAQ Section */}
+        <section className="space-y-6 max-w-3xl mx-auto pb-12">
+          <div className="text-center space-y-2 mb-8">
+            <h2 className="text-2xl font-bold">자주 묻는 질문</h2>
+            <p className="text-muted-foreground">CinemaFlow 서비스 이용에 대해 궁금한 점을 확인하세요.</p>
+          </div>
+          <LearningWrapper componentId="accordion">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>학습 모드가 무엇인가요?</AccordionTrigger>
+                <AccordionContent>
+                  우측 상단의 학습 모드 스위치를 켜면, 서비스 곳곳에 사용된 UI 컴포넌트들의 사용법과 소스 코드를 확인할 수 있는 특별한 모드입니다.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>영화 추천은 어떻게 이루어지나요?</AccordionTrigger>
+                <AccordionContent>
+                  회원님의 시청 기록과 평가 데이터를 기반으로 TMDB의 알고리즘을 활용하여 맞춤형 영화를 추천해 드립니다.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3">
+                <AccordionTrigger>컬렉션은 어떻게 만드나요?</AccordionTrigger>
+                <AccordionContent>
+                  영화 상세 페이지에서 '감상 기록 남기기' 버튼을 클릭하여 별점과 코멘트를 남기면 자동으로 내 컬렉션에 추가됩니다.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </LearningWrapper>
         </section>
       </div>
