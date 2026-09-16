@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Play, Plus, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,22 +26,24 @@ interface MovieHeroActionsProps {
 
 export function MovieHeroActions({ movieId, movieTitle, backdropUrl, posterUrl, videoKey }: MovieHeroActionsProps) {
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const handleAddToCollection = async () => {
-    const res = await addToCollection({
-      tmdb_movie_id: movieId,
-      movie_title: movieTitle,
-      poster_path: posterUrl,
-      status: "watch-later"
-    });
-    
-    if (res?.error) {
-      toast.error("오류 발생", { description: res.error });
-      return;
-    }
-
+  const handleAddToCollection = () => {
     toast.success("컬렉션에 추가되었습니다", {
       description: `"${movieTitle}" 영화가 '보고 싶은 영화'에 추가되었습니다.`,
+    });
+
+    startTransition(async () => {
+      const res = await addToCollection({
+        tmdb_movie_id: movieId,
+        movie_title: movieTitle,
+        poster_path: posterUrl,
+        status: "watch-later"
+      });
+
+      if (res?.error) {
+        toast.error("오류 발생", { description: res.error });
+      }
     });
   };
 
@@ -84,7 +86,7 @@ export function MovieHeroActions({ movieId, movieTitle, backdropUrl, posterUrl, 
         </Dialog>
       </LearningWrapper>
 
-      <Button size="lg" variant="secondary" className="rounded-full" onClick={handleAddToCollection}>
+      <Button size="lg" variant="secondary" className="rounded-full" onClick={handleAddToCollection} disabled={isPending}>
         <Plus className="mr-2 h-5 w-5" /> 내 컬렉션
       </Button>
       
