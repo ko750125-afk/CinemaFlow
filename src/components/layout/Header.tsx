@@ -32,6 +32,7 @@ export function Header({ user }: HeaderProps) {
   const pathname = usePathname();
   const { isLearningMode, toggleLearningMode, learnedComponents } = useLearningStore();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     { name: "홈", path: "/" },
@@ -172,7 +173,7 @@ export function Header({ user }: HeaderProps) {
             </div>
 
             {/* Mobile Menu */}
-            <Sheet>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button
                   variant="ghost"
@@ -184,7 +185,7 @@ export function Header({ user }: HeaderProps) {
               </SheetTrigger>
               <SheetContent side="right" className="pr-0">
                 <div className="px-7 flex flex-col gap-6">
-                  <Link href="/" className="flex items-center space-x-2">
+                  <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
                     <img src="/icon-192x192.jpg" alt="CinemaFlow Logo" className="h-6 w-6 rounded-md object-cover" />
                     <span className="font-bold">CinemaFlow</span>
                   </Link>
@@ -193,6 +194,7 @@ export function Header({ user }: HeaderProps) {
                       <Link
                         key={item.path}
                         href={item.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
                         className={`text-lg font-medium transition-colors hover:text-foreground/80 ${
                           pathname === item.path ? "text-foreground" : "text-foreground/60"
                         }`}
@@ -212,12 +214,12 @@ export function Header({ user }: HeaderProps) {
                     <div className="pr-6 pt-4 border-t">
                       {user ? (
                         <form action={logout} className="w-full">
-                          <Button variant="outline" type="submit" className="w-full">
+                          <Button variant="outline" type="submit" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
                             로그아웃
                           </Button>
                         </form>
                       ) : (
-                        <Button variant="default" asChild className="w-full">
+                        <Button variant="default" asChild className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
                           <Link href="/login">로그인</Link>
                         </Button>
                       )}
